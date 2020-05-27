@@ -1,0 +1,27 @@
+---
+title: 'Tidy Tuesday (22): Cocktails'
+output: html_document
+---
+
+# Initialize
+
+```{r}
+library("tidyverse")
+# also load tidy tuesday
+```
+
+```{r}
+# load the data
+```
+
+
+# EDA
+
+```{r}
+cocktails %>% glimpse()
+```
+
+## Univariate
+
+# Analysis
+
