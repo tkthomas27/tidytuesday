@@ -2,6 +2,7 @@
 library("tidyverse")
 library("scales")
 library("patchwork")
+library("tidytuesdayR")
 
 tuesdata <- tidytuesdayR::tt_load('2020-05-26')
 
@@ -140,18 +141,79 @@ p1+p3+p4+p5
 
 # cross tab
 
+cocktails %>% 
+  group_by(ingredient,glass) %>% tally() %>% 
+  filter(n > 10) %>% 
+  ggplot(aes(x = glass, y = ingredient)) +
+  geom_tile(aes(fill = n)) +
+  geom_text(aes(label = n)) +
+  ggthemes::theme_fivethirtyeight() +
+  ggthemes::scale_fill_continuous_tableau(palette = "Blue") +
+  labs(x = "", y = "") +
+  guides(fill = FALSE)
+
+# number of ingredients
+cocktails %>% 
+  group_by(drink) %>% mutate(mx = max(ingredient_number)) %>% 
+  group_by(mx) %>% tally() %>% 
+  ggplot(aes(x = as.factor(mx), y = n)) +
+  geom_col(aes(fill = n)) +
+  geom_label(aes(label = n), fill = "#c7673e") +
+  ggthemes::theme_fivethirtyeight() +
+  ggthemes::scale_fill_continuous_tableau(palette = "Blue") +
+  guides(fill = FALSE) +
+  labs(title = "Number of Ingredients")
+
+# upset plot
+
+# most common combos by 
+
+di <- cocktails %>% select(drink,ingredient)
+
+di %>%
+  group_by(ingredient) %>%
+  filter(n() > 1) %>%
+  split(.$ingredient) %>%
+  map(., 1) %>%
+  map(~combn(.x, m = 2)) %>%
+  map(~t(.x)) %>%
+  map_dfr(as_tibble) %>% print(n = 100)
+
+
+di %>% 
+  group_by(drink) %>% 
+  expand(ingredient)
 
 
 
+library("tidytext")
+
+x <- cocktails %>% select(category,drink,ingredient) %>% 
+  mutate(ingredient = str_replace_all(ingredient, " ", "_")) %>% 
+  group_by(category, drink) %>% 
+  mutate(ingredient_list = paste0(ingredient, collapse = " ")) %>% 
+  ungroup() %>% 
+  distinct(drink,.keep_all = T)
 
 
+library(dplyr)
+library(tidytext)
+library(janeaustenr)
 
+x %>% 
+  unnest_tokens(bigram, ingredient_list, token = "ngrams", n = 2) %>% filter(str_detect(bigram,"vodka") == TRUE) %>% View()
+  group_by(bigram) %>% tally() %>% 
+  filter(n > 3) %>% 
+  ggplot(aes(x = fct_reorder(bigram,n), y = n)) +
+  geom_col(aes(fill = n)) +
+  # geom_label(aes(label = percent(pct, accuracy = 1)), fill = "#c7673e") +
+  coord_flip() +
+  ggthemes::theme_fivethirtyeight() +
+  ggthemes::scale_fill_continuous_tableau(palette = "Blue") +
+  guides(fill = FALSE)
 
-
-
-
-
-
+  
+fausten_bigrams
 
 
 
